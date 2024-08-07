@@ -49,6 +49,6 @@ void setup() {
 }
 
 void loop() {
-  //hola
+  //hola ale
   // Aquí puedes agregar tu código principal
 }
