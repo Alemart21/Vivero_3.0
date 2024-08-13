@@ -39,8 +39,7 @@ void setup() {
   Firebase.reconnectWiFi(true);
 
   // Prueba de escritura de datos en Firebase
-  if (Firebase.setInt(firebaseData, "/prueba/Numero", 3446351496)) {
-    Firebase.setString(firebaseData, "/prueba/Nombre", "Alejandro");
+  if (Firebase.setString(firebaseData, "/prueba", "Hello_Word")) {
     Serial.println("Datos escritos correctamente!");
   } else {
     Serial.println("Error en la escritura de datos:");
@@ -49,6 +48,6 @@ void setup() {
 }
 
 void loop() {
-  //hola ale
+
   // Aquí puedes agregar tu código principal
 }
