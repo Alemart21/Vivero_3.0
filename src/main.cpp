@@ -48,6 +48,29 @@ void setup() {
 }
 
 void loop() {
+  if (Firebase.ready()) { //leo desdde firebase
+    if (Firebase.getString(firebaseData, "/Sensores/valoresCargados/temperaturaCargada")) {
+      String valor = firebaseData.stringData();     //cargo en valor lo que leo desde firebase
+      String numero = "";
+      
+      // Extraer solo los números del string
+      for (int i = 0; i < valor.length(); i++) {    //tengo q ver q hace este for
+        if (isDigit(valor[i])) {                    //ver que es isDigit
+          numero += valor[i];
+        }
+      }
 
-  // Aquí puedes agregar tu código principal
+      if (numero.length() > 0) {                 // ver que hace este if
+        int temperaturaCargada = numero.toInt(); // Convertir a número entero
+        Serial.print("Número leído: ");
+        Serial.println(temperaturaCargada);
+      } else {
+        Serial.println("No se encontraron números en el valor leído.");
+      }
+    } else {
+      Serial.println("Error al leer valor de Firebase");
+      Serial.println(firebaseData.errorReason());  //imprime el error de xq no leyo firebase
+    }
+  }
+  delay(10000); // Lee el valor cada 10 segundos
 }
