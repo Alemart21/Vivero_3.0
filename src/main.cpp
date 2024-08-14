@@ -2,6 +2,11 @@
 #include <WiFi.h>
 #include <FirebaseESP32.h>
 
+// Variables Utilizadas para la lectura desde firebase
+int temperaturaCargada, humedadCargada, luzCargada, humedadSueloCargada;
+// Variables utilizada para guardar info de sensores
+int temperatura, humedad, luz, humedadSuelo;
+
 // Reemplaza con tu SSID y Password
 const char* ssid = "WAB 2.4";
 const char* password = "ESCRIBILADOSVECES";
@@ -9,6 +14,10 @@ const char* password = "ESCRIBILADOSVECES";
 // Credenciales de Firebase
 #define FIREBASE_HOST "https://invernadero-3-0-default-rtdb.firebaseio.com/"  // Reemplaza con tu URL de Firebase
 #define FIREBASE_AUTH "gPtE4XXcsC6OT92hdQ9pw69Vdd00TKqyuY8PPaVd"   // Reemplaza con tu token
+
+// Declaraciones de void
+void leerYGuardarValor(String rutaFirebase, int &variableDestino);
+void cargarValorAFirebase(String rutaFirebase, int valor);
 
 // Instancia de Firebase
 FirebaseData firebaseData;
@@ -48,29 +57,64 @@ void setup() {
 }
 
 void loop() {
-  if (Firebase.ready()) { //leo desdde firebase
-    if (Firebase.getString(firebaseData, "/Sensores/valoresCargados/temperaturaCargada")) {
-      String valor = firebaseData.stringData();     //cargo en valor lo que leo desde firebase
+  temperatura=35;
+  humedad=100;
+  luz=49250;
+  humedadSuelo=100;
+
+  leerYGuardarValor("/Sensores/valoresCargados/temperaturaCargada", temperaturaCargada);
+  leerYGuardarValor("/Sensores/valoresCargados/humedadCargada", humedadCargada);
+  leerYGuardarValor("/Sensores/valoresCargados/luzCargada", luzCargada);
+  leerYGuardarValor("/Sensores/valoresCargados/humedadSueloCargada", humedadSueloCargada);
+  cargarValorAFirebase("/Sensores/temperaturaActual", temperatura);
+  cargarValorAFirebase("/Sensores/humedadActual", humedad);
+  cargarValorAFirebase("/Sensores/luxActual", luz);
+  cargarValorAFirebase("/Sensores/humedadSueloActual", humedadSuelo);
+
+  delay(5000); // Lee el valor cada 10 segundos
+}
+
+// Funcion para leer y guardar valores en esp32
+void leerYGuardarValor(String rutaFirebase, int &variableDestino) {
+  if (Firebase.ready()) {
+    if (Firebase.getString(firebaseData, rutaFirebase)) {
+      String valor = firebaseData.stringData();     // Carga en valor lo que lee desde Firebase
       String numero = "";
       
       // Extraer solo los números del string
-      for (int i = 0; i < valor.length(); i++) {    //tengo q ver q hace este for
-        if (isDigit(valor[i])) {                    //ver que es isDigit
+      for (int i = 0; i < valor.length(); i++) {
+        if (isDigit(valor[i])) {                    // Verifica si el carácter es un dígito
           numero += valor[i];
         }
       }
 
-      if (numero.length() > 0) {                 // ver que hace este if
-        int temperaturaCargada = numero.toInt(); // Convertir a número entero
+      if (numero.length() > 0) {                    // Verifica si se encontraron números
+        variableDestino = numero.toInt();           // Convertir a número entero y guardar en la variable pasada por referencia
         Serial.print("Número leído: ");
-        Serial.println(temperaturaCargada);
+        Serial.println(variableDestino);
       } else {
         Serial.println("No se encontraron números en el valor leído.");
       }
     } else {
       Serial.println("Error al leer valor de Firebase");
-      Serial.println(firebaseData.errorReason());  //imprime el error de xq no leyo firebase
+      Serial.println(firebaseData.errorReason());  // Imprime el error si no se pudo leer desde Firebase
     }
   }
-  delay(10000); // Lee el valor cada 10 segundos
+  delay(100);
+}
+
+// Función para cargar valores a Firebase
+void cargarValorAFirebase(String rutaFirebase, int valor) {
+  if (Firebase.ready()) {
+    if (Firebase.setInt(firebaseData, rutaFirebase, valor)) {
+      Serial.print("Valor ");
+      Serial.print(valor);
+      Serial.print(" guardado en ");
+      Serial.println(rutaFirebase);
+    } else {
+      Serial.print("Error al guardar valor en ");
+      Serial.println(rutaFirebase);
+      Serial.println(firebaseData.errorReason());
+    }
+  }
 }
