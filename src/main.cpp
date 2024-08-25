@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include "sensorDHT11.h"
 #include "firebaseDatos.h"
-
 // Variables Utilizadas para la lectura desde firebase
 int temperaturaCargada, humedadCargada, luzCargada, humedadSueloCargada;
 // Variables utilizada para guardar info de sensores
@@ -53,7 +52,6 @@ void setup() {
   digitalWrite(salidaRiego, LOW);
   digitalWrite(salidaVentilacion, LOW);
   digitalWrite(salidaHumidificador, LOW);
-
   }
 
 void loop() {
@@ -99,7 +97,6 @@ void loop() {
   else{
     digitalWrite(salidaLuz, LOW);
   }
-
   firebaseDatos.cargarValorFloat("/Sensores/temperaturaActual", temperatura);
   firebaseDatos.cargarValorFloat("/Sensores/humedadActual", humedad);
   firebaseDatos.cargarValorInt("/Sensores/luxActual", luz);
