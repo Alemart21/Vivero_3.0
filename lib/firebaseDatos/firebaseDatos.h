@@ -1,5 +1,5 @@
-#ifndef FIREBASEMANAGER_H
-#define FIREBASEMANAGER_H
+#ifndef firebaseManager_H
+#define firebaseManager_H
 
 #include <FirebaseESP32.h>
 
@@ -18,4 +18,4 @@ private:
     const char* _FIREBASE_AUTH;
 };
 
-#endif // FIREBASEMANAGER_H
+#endif // firebaseManager_H
