@@ -2,22 +2,20 @@
 #include <WiFi.h>
 #include "sensorDHT11.h"
 #include "firebaseDatos.h"
-#include "actuador.h"
 // Variables Utilizadas para la lectura desde firebase
 int temperaturaCargada, humedadCargada, luzCargada, humedadSueloCargada;
 // Variables utilizada para guardar info de sensores
-int analogValueLuz = 0, analogValueHumedadSuelo = 0, humedadSuelo = 0, luz = 0;
+int analogValueLuz = 0, analogValueHumedadSuelo = 0, humedadSuelo = 0, luz = 0, hist=2;
 float temperatura = 0, humedad = 0; 
 // Definicion de pines
 sensorDHT sensorDHT(4); // Entrada DHT11 pin 4
-#define pinLuz 35
-#define pinHumedadSuelo 34 
-Actuador calefactor(12, "Calefactor");
-Actuador ventilacion(13, "Ventilación");
-Actuador luzActuador(14, "Luz");
-Actuador riego(15, "Riego");
-Actuador humidificador(2, "Humidificador");
-
+#define pinLuz 34  // Entrada luz pin 34
+#define pinHumedadSuelo 35
+#define salidaCalefactor 12
+#define salidaVentilacion 13
+#define salidaLuz 14
+#define salidaRiego 15
+#define salidaHumidificador 2
 // WIFI SSID y Password
 const char* ssid = "WAB 2.4"; //Alumnos2.4GHz
 const char* password = "NOLAESCRIBAS"; //alumnosfcyt
@@ -41,9 +39,18 @@ void setup() {
   }
   sensorDHT.iniciar();  // Inicializa el sensorDHT11
   firebaseDatos.begin(); // Inicializa firebase
-
-  Serial.println("Dirección IP: ");
-  Serial.print(WiFi.localIP());
+  Serial.print("Dirección IP: ");
+  Serial.println(WiFi.localIP());
+  pinMode(salidaCalefactor, OUTPUT);
+  pinMode(salidaLuz, OUTPUT);
+  pinMode(salidaRiego, OUTPUT);
+  pinMode(salidaVentilacion, OUTPUT);
+  pinMode(salidaHumidificador, OUTPUT);
+  digitalWrite(salidaCalefactor, LOW);
+  digitalWrite(salidaLuz, LOW);
+  digitalWrite(salidaRiego, LOW);
+  digitalWrite(salidaVentilacion, LOW);
+  digitalWrite(salidaHumidificador, LOW);
   }
 
 void loop() {
@@ -57,20 +64,46 @@ void loop() {
   temperatura = sensorDHT.getTemperatura();
   temperatura = round(temperatura); // Redondeo el valor de temperatura
   humedad = sensorDHT.getHumedad();
-
   firebaseDatos.leerValor("/Sensores/valoresCargados/temperaturaCargada", temperaturaCargada);
   firebaseDatos.leerValor("/Sensores/valoresCargados/humedadCargada", humedadCargada);
   firebaseDatos.leerValor("/Sensores/valoresCargados/luzCargada", luzCargada);
   firebaseDatos.leerValor("/Sensores/valoresCargados/humedadSueloCargada", humedadSueloCargada);
-    // Control de temperatura
-  calefactor.controlar((temperaturaCargada - 2) > temperatura);
-  ventilacion.controlar((temperaturaCargada + 2) < temperatura);
-    // Control de humedad
-  humidificador.controlar((humedadCargada + 2) < humedad);
-    // Control de humedad del suelo
-  riego.controlar((humedadSueloCargada + 2) < humedadSuelo);
-    // Control de luz
-  luzActuador.controlar((luzCargada + 2) > luz);
+  if ((temperaturaCargada+2)<=temperatura){ // Control de temperatura
+    digitalWrite(salidaCalefactor, LOW);
+    digitalWrite(salidaVentilacion, HIGH);
+    Serial.println("Ventilacion: ON");
+    Serial.println("Calefaccion: OFF");
+  }
+  else if ((temperaturaCargada-2)>=temperatura){
+    digitalWrite(salidaVentilacion, LOW);
+    digitalWrite(salidaCalefactor, HIGH);
+    Serial.println("Ventilacion: OFF");
+    Serial.println("Calefaccion: ON");
+  }
+  if((humedadCargada-2)>=humedad){ // Control de humedad
+    digitalWrite(salidaHumidificador, HIGH);
+    Serial.println("Humidificador: ON");
+  }
+  else if((humedadCargada+2)<=humedad){
+    digitalWrite(salidaHumidificador, LOW);
+    Serial.println("Humidificador: OFF");
+  }
+  if((humedadSueloCargada-2)>=humedadSuelo){ // Control humedad suelo
+    digitalWrite(salidaRiego, HIGH);
+    Serial.println("Riego: ON");
+  }
+  else if((humedadSueloCargada+2)<=humedadSuelo){
+    digitalWrite(salidaRiego, LOW);
+    Serial.println("Riego: OFF");
+  }
+  if ((luzCargada-2)>=luz){ // Control luz
+    digitalWrite(salidaLuz, HIGH);
+    Serial.println("Iluminacion: ON");
+  }
+  else if ((luzCargada+2)<=luz){
+    digitalWrite(salidaLuz, LOW);
+    Serial.println("Iluminacion: OFF");
+  }
   firebaseDatos.cargarValorFloat("/Sensores/temperaturaActual", temperatura);
   firebaseDatos.cargarValorFloat("/Sensores/humedadActual", humedad);
   firebaseDatos.cargarValorInt("/Sensores/luxActual", luz);
