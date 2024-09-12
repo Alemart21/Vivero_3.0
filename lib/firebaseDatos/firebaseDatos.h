@@ -5,6 +5,7 @@
 
 // Clase FirebaseManager
 class firebaseDatos {
+    
 public:
     firebaseDatos(const char* host, const char* auth);
     void begin();

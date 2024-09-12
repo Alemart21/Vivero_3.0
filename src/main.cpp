@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include "sensorDHT11.h"
-#include "firebaseDatos.h"
+#include <sensorDHT11.h>
+#include <firebaseDatos.h>
 // Variables Utilizadas para la lectura desde firebase
 int temperaturaCargada, humedadCargada, luzCargada, humedadSueloCargada;
 // Variables utilizada para guardar info de sensores
@@ -17,8 +17,8 @@ sensorDHT sensorDHT(4); // Entrada DHT11 pin 4
 #define salidaRiego 15
 #define salidaHumidificador 2
 // WIFI SSID y Password
-const char* ssid = "WAB 2.4"; //Alumnos2.4GHz
-const char* password = "NOLAESCRIBAS"; //alumnosfcyt
+const char* ssid = "Alumnos2.4GHz"; //Alumnos2.4GHz WAB 2.4
+const char* password = "alumnosfcyt"; //alumnosfcyt NOLAESCRIBAS
 // Credenciales de Firebase
 #define FIREBASE_HOST "https://invernadero-3-0-default-rtdb.firebaseio.com/"  // URL Firebase
 #define FIREBASE_AUTH "gPtE4XXcsC6OT92hdQ9pw69Vdd00TKqyuY8PPaVd"   // Token Firebase
